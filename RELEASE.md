@@ -78,7 +78,7 @@ Once you push the tag, go to your repo on GitHub → **Actions** tab → you'll 
 | Step | Detail |
 |------|--------|
 | Setup | Java 17 + Flutter |
-| Build | `flutter build apk` → universal APK |
+| Build | `flutter build apk --split-per-abi` → `app-arm64-v8a-release.apk` (~28 MB) for modern phones |
 | Checksum | `sha256sum` → `android-checksum.txt` |
 | Upload | APK + checksum saved as artifact |
 
@@ -144,12 +144,12 @@ Windows builds need the Visual Studio Build Tools. The `windows-latest` runner h
 - A missing plugin that doesn't support Windows → check `flutter doctor -v` on Windows
 - Try building locally first: `flutter build windows` and fix any errors
 
-### Build failed on `flutter build apk`
+### Build failed on `flutter build apk` (or `--split-per-abi`)
 
 Check:
 - Java 17 is available (the workflow sets it up)
 - All dependencies are compatible with Android
-- Try building locally: `flutter build apk` and fix any errors
+- Try building locally: `flutter build apk --split-per-abi` and fix any errors
 
 ### Manifest update commit triggered another workflow run
 

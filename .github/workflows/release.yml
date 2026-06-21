@@ -32,11 +32,11 @@ jobs:
 
       - run: flutter pub get
 
-      - run: flutter build apk
+      - run: flutter build apk --split-per-abi
 
       - name: Compute SHA256
         run: |
-          cp build/app/outputs/flutter-apk/app-release.apk .
+          cp build/app/outputs/flutter-apk/app-arm64-v8a-release.apk app-release.apk
           sha256sum app-release.apk | cut -d' ' -f1 > android-checksum.txt
 
       - uses: actions/upload-artifact@v4
@@ -80,7 +80,7 @@ jobs:
         run: |
           iscc windows\installer\setup.iss /DMyAppVersion=${{ steps.version.outputs.name }}
           Copy-Item build\installer\tagar-setup-*.exe tagar-setup.exe
-          (Get-FileHash tagar-setup.exe -Algorithm SHA256).Hash.ToLower() > windows-checksum.txt
+          (Get-FileHash tagar-setup.exe -Algorithm SHA256).Hash.Trim().ToLower() > windows-checksum.txt
 
       - uses: actions/upload-artifact@v4
         with:
@@ -120,7 +120,7 @@ jobs:
           APK_URL="https://github.com/$REPO/releases/download/$TAG/app-release.apk"
           WIN_URL="https://github.com/$REPO/releases/download/$TAG/tagar-setup.exe"
           ANDROID_SHA=$(cat android-checksum.txt | tr -d '\n')
-          WINDOWS_SHA=$(cat windows-checksum.txt | tr -d '\n')
+          WINDOWS_SHA=$(cat windows-checksum.txt | tr -d '\n\r')
 
           cat > update_manifest.json <<EOF
           {

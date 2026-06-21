@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'package:crypto/crypto.dart';
@@ -19,11 +20,21 @@ class UpdateService {
 
   Future<UpdateManifest?> fetchManifest() async {
     try {
-      final response = await http.get(Uri.parse(_manifestUrl));
-      if (response.statusCode != 200) return null;
-      return UpdateManifest.fromJson(
-        jsonDecode(response.body) as Map<String, dynamic>,
-      );
+      final client = http.Client();
+      try {
+        final request = http.Request('GET', Uri.parse(_manifestUrl));
+        request.headers['User-Agent'] = 'Tagar/$repoOwner';
+        final response = await client
+            .send(request)
+            .timeout(const Duration(seconds: 10));
+        if (response.statusCode != 200) return null;
+        final body = await response.stream.bytesToString();
+        return UpdateManifest.fromJson(
+          jsonDecode(body) as Map<String, dynamic>,
+        );
+      } finally {
+        client.close();
+      }
     } catch (_) {
       return null;
     }
