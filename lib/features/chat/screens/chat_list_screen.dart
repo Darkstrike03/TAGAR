@@ -95,6 +95,7 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
         child: Column(
           children: [
             _SearchBar(),
+            const Divider(height: 1, color: AppColors.sandyBrown),
             Expanded(child: _buildChatList()),
           ],
         ),
@@ -149,6 +150,7 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
               child: Column(
                 children: [
                   _SearchBar(),
+                  const Divider(height: 1, color: AppColors.sandyBrown),
                   Expanded(child: _buildChatList()),
                 ],
               ),
@@ -302,9 +304,11 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
     return ListView.separated(
       padding: const EdgeInsets.symmetric(horizontal: 8),
       itemCount: contacts.length,
-      separatorBuilder: (_, __) => const Padding(
-        padding: EdgeInsets.only(left: 64),
-        child: Divider(height: 1),
+      separatorBuilder: (_, __) => const Divider(
+        height: 1,
+        thickness: 0.5,
+        indent: 64,
+        color: AppColors.sandyBrown,
       ),
       itemBuilder: (_, index) {
         final contact = contacts[index];
