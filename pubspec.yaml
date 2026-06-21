@@ -1,7 +1,7 @@
 name: tagar
 description: "Tagar — A nature-inspired communication app."
 publish_to: 'none'
-version: 1.0.3+4
+version: 1.0.4+5
 
 environment:
   sdk: ^3.10.7
@@ -28,6 +28,7 @@ dependencies:
   mobile_scanner: ^6.0.0
   qr_flutter: ^4.1.0
   image_picker: ^1.0.0
+  crop_your_image: ^1.0.0
 
 dev_dependencies:
   flutter_test:
