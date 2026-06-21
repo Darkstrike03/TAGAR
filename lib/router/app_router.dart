@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../features/splash/screens/splash_screen.dart';
 import '../features/auth/screens/login_screen.dart';
@@ -118,6 +119,14 @@ class HomeShell extends StatelessWidget {
 
 final GoRouter appRouter = GoRouter(
   initialLocation: '/splash',
+  redirect: (context, state) {
+    final isLoggedIn = Supabase.instance.client.auth.currentSession != null;
+    final onAuthPage = state.matchedLocation == '/splash' ||
+        state.matchedLocation == '/login';
+    if (!isLoggedIn && !onAuthPage) return '/login';
+    if (isLoggedIn && onAuthPage) return '/chat';
+    return null;
+  },
   routes: [
     GoRoute(
       path: '/splash',
