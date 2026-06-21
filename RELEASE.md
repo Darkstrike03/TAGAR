@@ -5,7 +5,7 @@
 Pushing a Git tag (e.g. `v1.0.1`) triggers a **GitHub Actions** workflow that:
 
 1. Builds `app-release.apk` (Android) on an Ubuntu runner
-2. Builds `tagar-windows.zip` (Windows) on a Windows runner
+2. Builds `tagar-setup-*.exe` (Windows installer) on a Windows runner via Inno Setup
 3. Computes SHA256 checksums for both
 4. Updates `update_manifest.json` with the new version, URLs, and checksums
 5. Commits the updated manifest back to the repo
@@ -87,7 +87,7 @@ Once you push the tag, go to your repo on GitHub → **Actions** tab → you'll 
 |------|--------|
 | Setup | Flutter on Windows |
 | Build | `flutter build windows` |
-| Package | Zips the entire `Release/` folder → `tagar-windows.zip` |
+| Package | Builds a single-file installer via Inno Setup → `tagar-setup-*.exe` |
 | Checksum | `Get-FileHash` → `windows-checksum.txt` |
 | Upload | ZIP + checksum saved as artifact |
 
@@ -106,7 +106,7 @@ Once you push the tag, go to your repo on GitHub → **Actions** tab → you'll 
 ### 4a. Verify on GitHub
 
 1. Go to your repo → **Releases** → you should see the new release
-2. Click the release — both `app-release.apk` and `tagar-windows.zip` should be attached
+2. Click the release — both `app-release.apk` and `tagar-setup-*.exe` should be attached
 3. Go to the repo root — `update_manifest.json` should show the updated version
 
 ### 4b. Test the in-app update flow
@@ -125,7 +125,7 @@ https://github.com/Darkstrike03/TAGAR/releases/tag/v1.0.1
 
 **Android:** Friends download `app-release.apk`, enable "Install from unknown apps", and install.
 
-**Windows:** Friends download `tagar-windows.zip`, extract, and run `tagar.exe`.
+**Windows:** Friends download `tagar-setup-*.exe`, double-click, and follow the installer. It installs to Start Menu and optionally creates a desktop shortcut.
 
 ---
 

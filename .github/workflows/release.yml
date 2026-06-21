@@ -65,16 +65,27 @@ jobs:
 
       - run: flutter build windows
 
-      - name: Zip & checksum
+      - name: Extract version
+        id: version
         run: |
-          Compress-Archive -Path build\windows\x64\runner\Release\* -DestinationPath tagar-windows.zip
-          (Get-FileHash tagar-windows.zip -Algorithm SHA256).Hash.ToLower() > windows-checksum.txt
+          $pubspec = Get-Content pubspec.yaml
+          $v = ($pubspec | Select-String '^version: ').ToString().Split(' ')[1].Split('+')[0]
+          echo "name=$v" >> $env:GITHUB_OUTPUT
+
+      - name: Install Inno Setup
+        run: choco install innosetup --no-progress
+
+      - name: Build installer & checksum
+        run: |
+          iscc windows\installer\setup.iss /DMyAppVersion=${{ steps.version.outputs.name }}
+          Copy-Item build\installer\tagar-setup-*.exe tagar-setup.exe
+          (Get-FileHash tagar-setup.exe -Algorithm SHA256).Hash.ToLower() > windows-checksum.txt
 
       - uses: actions/upload-artifact@v4
         with:
-          name: windows-zip
+          name: windows-installer
           path: |
-            tagar-windows.zip
+            tagar-setup.exe
             windows-checksum.txt
 
   release:
@@ -89,6 +100,8 @@ jobs:
           ref: main
 
       - uses: actions/download-artifact@v4
+        with:
+          merge-multiple: true
 
       - name: Extract version from pubspec.yaml
         id: version
@@ -104,9 +117,9 @@ jobs:
           VCODE=${{ steps.version.outputs.code }}
 
           APK_URL="https://github.com/$REPO/releases/download/$TAG/app-release.apk"
-          WIN_URL="https://github.com/$REPO/releases/download/$TAG/tagar-windows.zip"
-          ANDROID_SHA=$(cat android-apk/android-checksum.txt | tr -d '\n')
-          WINDOWS_SHA=$(cat windows-zip/windows-checksum.txt | tr -d '\n')
+          WIN_URL="https://github.com/$REPO/releases/download/$TAG/tagar-setup.exe"
+          ANDROID_SHA=$(cat android-checksum.txt | tr -d '\n')
+          WINDOWS_SHA=$(cat windows-checksum.txt | tr -d '\n')
 
           cat > update_manifest.json <<EOF
           {
@@ -137,6 +150,6 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           files: |
-            android-apk/app-release.apk
-            windows-zip/tagar-windows.zip
+            app-release.apk
+            tagar-setup.exe
           generate_release_notes: true
