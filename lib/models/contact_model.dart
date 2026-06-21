@@ -5,6 +5,7 @@ class Contact {
   final String contactTagarId;
   final String? displayName;
   final String? profileName;
+  final String? profilePicture;
   final DateTime createdAt;
 
   Contact({
@@ -14,6 +15,7 @@ class Contact {
     required this.contactTagarId,
     this.displayName,
     this.profileName,
+    this.profilePicture,
     required this.createdAt,
   });
 
@@ -25,6 +27,7 @@ class Contact {
       contactTagarId: json['contact_tagar_id'] as String,
       displayName: json['display_name'] as String?,
       profileName: json['profile_name'] as String?,
+      profilePicture: json['profile_picture'] as String?,
       createdAt: DateTime.parse(json['created_at'] as String),
     );
   }
