@@ -221,7 +221,7 @@ final GoRouter appRouter = GoRouter(
       name: RouteNames.chat,
       builder: (_, state) {
         final contactUserId = state.pathParameters['contactUserId']!;
-        final extra = state.extra as Map<String, String>? ?? {};
+        final extra = state.extra as Map<String, String?>? ?? {};
         return ChatScreen(
           contactName: extra['contactName'] ?? 'Unknown',
           contactUserId: contactUserId,

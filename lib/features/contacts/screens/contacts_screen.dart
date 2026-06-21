@@ -202,6 +202,7 @@ class _ContactsScreenState extends ConsumerState<ContactsScreen>
             return ListTile(
               leading: AvatarWidget(
                 name: c.displayName ?? c.profileName ?? c.contactTagarId,
+                imageUrl: c.profilePicture,
                 size: 48,
               ),
               title: Text(
@@ -220,6 +221,7 @@ class _ContactsScreenState extends ConsumerState<ContactsScreen>
                       contactName: displayName,
                       contactUserId: c.contactUserId,
                       contactTagarId: c.contactTagarId,
+                      contactProfilePicture: c.profilePicture,
                     ),
                   ),
                 );
