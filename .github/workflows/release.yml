@@ -36,13 +36,14 @@ jobs:
 
       - name: Compute SHA256
         run: |
-          sha256sum build/app/outputs/flutter-apk/app-release.apk | cut -d' ' -f1 > android-checksum.txt
+          cp build/app/outputs/flutter-apk/app-release.apk .
+          sha256sum app-release.apk | cut -d' ' -f1 > android-checksum.txt
 
       - uses: actions/upload-artifact@v4
         with:
           name: android-apk
           path: |
-            build/app/outputs/flutter-apk/app-release.apk
+            app-release.apk
             android-checksum.txt
 
   build-windows:
