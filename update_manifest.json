@@ -7,8 +7,8 @@
     "windows": "https://github.com/Darkstrike03/TAGAR/releases/download/v1.0.2/tagar-setup.exe"
   },
   "sha256Checksum": {
-    "android": "c9ab1ef4894988dc0b59f3b164de51c744ad57d77fb724720807345797c18ff3",
-    "windows": "a3678cce7ee28da162bfb1bb4243c46a882821c8185ea48d0c821de4bb6fb7fc"
+    "android": "d3c92b69e3cfcd79f5e196075dba2cf9e1e39f91c29bd6cb5b4f9f740dcc4035",
+    "windows": "8bfd30dfc3f1f10cc58d1964364e21cd8869d18bfdd13248761ce0e28fb2c15a"
   },
   "releaseNotes": ""
 }
