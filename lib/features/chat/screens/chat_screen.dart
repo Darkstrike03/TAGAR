@@ -34,6 +34,8 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   final _scrollController = ScrollController();
   List<LocalMessage> _messages = [];
   bool _loading = true;
+  late final _messageNotifier =
+      ref.read(messageRelayProvider).messageNotifier;
 
   @override
   void initState() {
@@ -47,25 +49,32 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   void dispose() {
     _controller.dispose();
     _scrollController.dispose();
-    ref.read(messageRelayProvider).messageNotifier.removeListener(_onNewMessage);
+    _messageNotifier.removeListener(_onNewMessage);
     super.dispose();
   }
 
   Future<void> _loadMessages() async {
-    final storage = ref.read(messageStorageProvider);
-    final messages = await storage.getMessages(widget.contactUserId);
-    if (!mounted) return;
-    setState(() {
-      _messages = messages;
-      _loading = false;
-    });
-    WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToBottom());
+    try {
+      final storage = ref.read(messageStorageProvider);
+      final messages = await storage.getMessages(widget.contactUserId);
+      if (!mounted) return;
+      setState(() {
+        _messages = messages;
+        _loading = false;
+      });
+      WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToBottom());
+    } catch (_) {
+      if (mounted) {
+        setState(() => _loading = false);
+      }
+    }
   }
 
   void _listenForNewMessages() {
-    final relay = ref.read(messageRelayProvider);
-    relay.subscribeToIncoming();
-    relay.messageNotifier.addListener(_onNewMessage);
+    _messageNotifier.addListener(_onNewMessage);
+    try {
+      ref.read(messageRelayProvider).subscribeToIncoming();
+    } catch (_) {}
   }
 
   void _onNewMessage() {
