@@ -1,4 +1,4 @@
-import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -8,6 +8,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:crop_your_image/crop_your_image.dart';
 
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
@@ -83,6 +84,52 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     );
   }
 
+  Future<Uint8List?> _cropImage({
+    required Uint8List imageBytes,
+    required bool circleShape,
+  }) {
+    final controller = CropController();
+    return Navigator.of(context, rootNavigator: true).push<Uint8List>(
+      MaterialPageRoute(
+        fullscreenDialog: true,
+        builder: (ctx) => Scaffold(
+          backgroundColor: Colors.black,
+          appBar: AppBar(
+            backgroundColor: Colors.black,
+            foregroundColor: Colors.white,
+            title: const Text('Crop Image'),
+            leading: IconButton(
+              icon: const Icon(Icons.close),
+              onPressed: () => Navigator.pop(ctx),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => controller.crop(),
+                child: const Text('Done',
+                    style: TextStyle(color: Colors.white)),
+              ),
+            ],
+          ),
+          body: Crop(
+            image: imageBytes,
+            controller: controller,
+            interactive: true,
+            onCropped: (cropped) {
+              if (ctx.mounted) {
+                Navigator.pop(ctx, cropped);
+              }
+            },
+            withCircleUi: circleShape,
+            aspectRatio: circleShape ? 1 : 3,
+            initialSize: 0.9,
+            baseColor: Colors.black,
+            maskColor: Colors.black54,
+          ),
+        ),
+      ),
+    );
+  }
+
   Future<void> _pickImage(String field) async {
     final source = await _pickSource();
     if (source == null) return;
@@ -105,11 +152,18 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       );
       if (image == null) return;
 
+      final rawBytes = await image.readAsBytes();
+
+      final isProfile = field == 'profile_picture';
+      final croppedBytes = await _cropImage(
+        imageBytes: rawBytes,
+        circleShape: isProfile,
+      );
+
+      if (croppedBytes == null) return;
+
       final userId = Supabase.instance.client.auth.currentUser!.id;
       final path = '$userId/$field.jpg';
-
-      final file = File(image.path);
-      final bytes = await file.readAsBytes();
 
       final session = Supabase.instance.client.auth.currentSession;
       if (session == null) throw Exception('Not logged in');
@@ -125,7 +179,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           'x-upsert': 'true',
           'Content-Type': 'image/jpeg',
         },
-        body: bytes,
+        body: croppedBytes,
       );
 
       if (uploadResponse.statusCode != 200 &&
@@ -136,7 +190,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         );
       }
 
-      final publicUrl = '$storageUrl/object/public/profiles/$path';
+      final version = DateTime.now().millisecondsSinceEpoch;
+      final publicUrl =
+          '$storageUrl/object/public/profiles/$path?v=$version';
 
       await Supabase.instance.client
           .from('user_data')
@@ -148,9 +204,11 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       if (mounted) {
         var msg = 'Upload failed';
         if (e.statusCode == '404') {
-          msg = 'Storage bucket "profiles" not found. Create it in Supabase dashboard → Storage.';
-        } else         if (e.statusCode == '403') {
-          msg = 'Upload denied — add INSERT RLS policy on storage.objects for bucket "profiles".';
+          msg =
+              'Storage bucket "profiles" not found. Create it in Supabase dashboard → Storage.';
+        } else if (e.statusCode == '403') {
+          msg =
+              'Upload denied — add INSERT RLS policy on storage.objects for bucket "profiles".';
         } else if (e.statusCode == '401') {
           msg = 'Session expired. Please log out and log in again.';
         } else {
