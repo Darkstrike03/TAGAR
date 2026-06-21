@@ -28,28 +28,29 @@ class ContactService {
     final userIds = contacts.map((c) => c.contactUserId).toList();
     final userDataResponse = await Supabase.instance.client
         .from('user_data')
-        .select('id, profile_name')
+        .select('id, profile_name, profile_picture')
         .inFilter('id', userIds);
 
     final profileMap = {
       for (final row in (userDataResponse as List))
-        row['id'] as String: row['profile_name'] as String?,
+        row['id'] as String: {
+          'profile_name': row['profile_name'] as String?,
+          'profile_picture': row['profile_picture'] as String?,
+        },
     };
 
     return contacts.map((c) {
-      final profileName = profileMap[c.contactUserId];
-      if (profileName != null) {
-        return Contact(
-          id: c.id,
-          userId: c.userId,
-          contactUserId: c.contactUserId,
-          contactTagarId: c.contactTagarId,
-          displayName: c.displayName,
-          profileName: profileName,
-          createdAt: c.createdAt,
-        );
-      }
-      return c;
+      final data = profileMap[c.contactUserId];
+      return Contact(
+        id: c.id,
+        userId: c.userId,
+        contactUserId: c.contactUserId,
+        contactTagarId: c.contactTagarId,
+        displayName: c.displayName,
+        profileName: data?['profile_name'],
+        profilePicture: data?['profile_picture'],
+        createdAt: c.createdAt,
+      );
     }).toList();
   }
 

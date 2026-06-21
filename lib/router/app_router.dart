@@ -226,6 +226,7 @@ final GoRouter appRouter = GoRouter(
           contactName: extra['contactName'] ?? 'Unknown',
           contactUserId: contactUserId,
           contactTagarId: extra['contactTagarId'],
+          contactProfilePicture: extra['contactProfilePicture'],
         );
       },
     ),

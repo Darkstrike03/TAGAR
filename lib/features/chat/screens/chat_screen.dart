@@ -13,6 +13,7 @@ class ChatScreen extends ConsumerStatefulWidget {
   final String contactName;
   final String contactUserId;
   final String? contactTagarId;
+  final String? contactProfilePicture;
   final bool showBackButton;
 
   const ChatScreen({
@@ -20,6 +21,7 @@ class ChatScreen extends ConsumerStatefulWidget {
     required this.contactName,
     required this.contactUserId,
     this.contactTagarId,
+    this.contactProfilePicture,
     this.showBackButton = true,
   });
 
@@ -119,7 +121,11 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
         titleSpacing: 0,
         title: Row(
           children: [
-            AvatarWidget(name: widget.contactName, size: 38),
+            AvatarWidget(
+              name: widget.contactName,
+              imageUrl: widget.contactProfilePicture,
+              size: 38,
+            ),
             const SizedBox(width: 10),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,

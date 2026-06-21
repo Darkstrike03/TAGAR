@@ -166,6 +166,7 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
                       _selectedContact!.contactTagarId,
                   contactUserId: _selectedContact!.contactUserId,
                   contactTagarId: _selectedContact!.contactTagarId,
+                  contactProfilePicture: _selectedContact!.profilePicture,
                   showBackButton: false,
                 )
               : _buildEmptyDetailView(),
@@ -333,6 +334,7 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
                 extra: {
                   'contactName': displayName,
                   'contactTagarId': contact.contactTagarId,
+                  'contactProfilePicture': contact.profilePicture,
                 },
               );
             }
@@ -347,7 +349,11 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
                 const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
             child: Row(
               children: [
-                AvatarWidget(name: displayName, size: 52),
+                AvatarWidget(
+                  name: displayName,
+                  imageUrl: contact.profilePicture,
+                  size: 52,
+                ),
                 const SizedBox(width: 14),
                 Expanded(
                   child: Column(
