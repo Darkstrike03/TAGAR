@@ -4,11 +4,11 @@
   "minVersionCode": 1,
   "downloadUrl": {
     "android": "https://github.com/Darkstrike03/TAGAR/releases/download/v1.0.1/app-release.apk",
-    "windows": "https://github.com/Darkstrike03/TAGAR/releases/download/v1.0.1/tagar-windows.zip"
+    "windows": "https://github.com/Darkstrike03/TAGAR/releases/download/v1.0.1/tagar-setup.exe"
   },
   "sha256Checksum": {
-    "android": "216ca5f0f7df064f5ef729415d7211ce4197559b1562d8bf97135f6f0967a951",
-    "windows": "671a3fa739b953bdfb2e2c82e8dd95f68c58ced3470bbc56770f291f12059fa3"
+    "android": "b08785fc39123d88306eba54fb0aef5ba7e2c8e699afcbc8b64779941f379647",
+    "windows": "e831f81e40dc63f129d3b740a978bee734d9c608c574aeeedab1125802498bd7"
   },
   "releaseNotes": ""
 }
