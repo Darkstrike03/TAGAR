@@ -12,6 +12,7 @@ import '../features/settings/screens/settings_screen.dart';
 import '../features/contacts/screens/contacts_screen.dart';
 import '../features/contacts/screens/add_contact_screen.dart';
 import '../features/chat/screens/chat_screen.dart';
+import '../core/theme/app_colors.dart';
 import 'route_names.dart';
 
 class HomeShell extends StatelessWidget {
@@ -32,31 +33,66 @@ class HomeShell extends StatelessWidget {
   Widget _buildNarrowLayout() {
     return Scaffold(
       body: navigationShell,
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: navigationShell.currentIndex,
-        onTap: (index) => navigationShell.goBranch(index),
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.chat_bubble_outline),
-            activeIcon: Icon(Icons.chat_bubble),
-            label: 'Chat',
+      bottomNavigationBar: Container(
+        decoration: BoxDecoration(
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.08),
+              blurRadius: 8,
+              offset: const Offset(0, -2),
+            ),
+          ],
+        ),
+        child: ClipRRect(
+          borderRadius: const BorderRadius.only(
+            topLeft: Radius.circular(20),
+            topRight: Radius.circular(20),
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.circle_outlined),
-            activeIcon: Icon(Icons.circle),
-            label: 'Updates',
+          child: NavigationBar(
+            selectedIndex: navigationShell.currentIndex,
+            onDestinationSelected: (index) =>
+                navigationShell.goBranch(index),
+            backgroundColor: AppColors.barkCream,
+            indicatorColor: AppColors.leafGreen.withValues(alpha: 0.2),
+            indicatorShape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+            height: 64,
+            labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
+            shadowColor: Colors.transparent,
+            surfaceTintColor: Colors.transparent,
+            destinations: const [
+              NavigationDestination(
+                icon: Icon(Icons.chat_bubble_outline,
+                    color: AppColors.earthBrown),
+                selectedIcon: Icon(Icons.chat_bubble,
+                    color: AppColors.leafGreen),
+                label: 'Chat',
+              ),
+              NavigationDestination(
+                icon: Icon(Icons.circle_outlined,
+                    color: AppColors.earthBrown),
+                selectedIcon: Icon(Icons.circle,
+                    color: AppColors.leafGreen),
+                label: 'Updates',
+              ),
+              NavigationDestination(
+                icon: Icon(Icons.store_outlined,
+                    color: AppColors.earthBrown),
+                selectedIcon: Icon(Icons.store,
+                    color: AppColors.leafGreen),
+                label: 'Store',
+              ),
+              NavigationDestination(
+                icon: Icon(Icons.person_outline,
+                    color: AppColors.earthBrown),
+                selectedIcon: Icon(Icons.person,
+                    color: AppColors.leafGreen),
+                label: 'Profile',
+              ),
+            ],
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.store_outlined),
-            activeIcon: Icon(Icons.store),
-            label: 'Store',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person_outline),
-            activeIcon: Icon(Icons.person),
-            label: 'Profile',
-          ),
-        ],
+        ),
       ),
     );
   }
@@ -70,8 +106,8 @@ class HomeShell extends StatelessWidget {
             onDestinationSelected: (index) =>
                 navigationShell.goBranch(index),
             labelType: NavigationRailLabelType.all,
-            backgroundColor: const Color(0xFFEDE8DC),
-            indicatorColor: const Color(0xFF5A8A3C),
+            backgroundColor: AppColors.barkCream,
+            indicatorColor: AppColors.leafGreen,
             leading: Padding(
               padding: const EdgeInsets.symmetric(vertical: 12),
               child: Center(
@@ -81,7 +117,7 @@ class HomeShell extends StatelessWidget {
                     fontFamily: 'CormorantGaramond',
                     fontWeight: FontWeight.w600,
                     fontSize: 16,
-                    color: const Color(0xFF2E5220),
+                    color: AppColors.forestGreen,
                   ),
                 ),
               ),
