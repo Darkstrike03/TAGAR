@@ -1,0 +1,23 @@
+# Flutter
+.dart_tool/
+.packages
+build/
+*.iml
+.idea/
+.vscode/
+*.lock
+
+# Environment
+.env
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Flutter pub
+.pub-cache/
+pubspec.lock
+
+# Generated
+*.g.dart
+*.freezed.dart
