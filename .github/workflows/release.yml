@@ -113,12 +113,15 @@ jobs:
           }
           EOF
 
-      - uses: stefanzweifel/git-auto-commit-action@v5
+      - name: Push updated manifest
+        if: github.ref_type == 'tag'
+        uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: "Update manifest for ${{ github.ref_name }} [skip ci]"
           file_pattern: update_manifest.json
 
       - name: Create Release
+        if: github.ref_type == 'tag'
         uses: softprops/action-gh-release@v2
         with:
           files: |
