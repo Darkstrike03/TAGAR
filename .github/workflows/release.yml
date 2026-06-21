@@ -1,0 +1,121 @@
+name: Build & Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build-android:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.x'
+          cache: true
+
+      - run: flutter pub get
+
+      - run: flutter build apk
+
+      - name: Compute SHA256
+        run: |
+          sha256sum build/app/outputs/flutter-apk/app-release.apk | cut -d' ' -f1 > android-checksum.txt
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: android-apk
+          path: |
+            build/app/outputs/flutter-apk/app-release.apk
+            android-checksum.txt
+
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.x'
+          cache: true
+
+      - run: flutter pub get
+
+      - run: flutter build windows
+
+      - name: Zip & checksum
+        run: |
+          Compress-Archive -Path build\windows\x64\runner\Release\* -DestinationPath tagar-windows.zip
+          (Get-FileHash tagar-windows.zip -Algorithm SHA256).Hash.ToLower() > windows-checksum.txt
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: windows-zip
+          path: |
+            tagar-windows.zip
+            windows-checksum.txt
+
+  release:
+    needs: [build-android, build-windows]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/download-artifact@v4
+
+      - name: Extract version from pubspec.yaml
+        id: version
+        run: |
+          echo "name=$(grep '^version: ' pubspec.yaml | sed 's/version: //' | sed 's/+.*//')" >> $GITHUB_OUTPUT
+          echo "code=$(grep '^version: ' pubspec.yaml | sed 's/.*+//')" >> $GITHUB_OUTPUT
+
+      - name: Update update_manifest.json
+        run: |
+          TAG="${{ github.ref_name }}"
+          REPO="${{ github.repository }}"
+          VERSION="${{ steps.version.outputs.name }}"
+          VCODE=${{ steps.version.outputs.code }}
+
+          APK_URL="https://github.com/$REPO/releases/download/$TAG/app-release.apk"
+          WIN_URL="https://github.com/$REPO/releases/download/$TAG/tagar-windows.zip"
+          ANDROID_SHA=$(cat android-apk/android-checksum.txt | tr -d '\n')
+          WINDOWS_SHA=$(cat windows-zip/windows-checksum.txt | tr -d '\n')
+
+          cat > update_manifest.json <<EOF
+          {
+            "latestVersion": "$VERSION",
+            "versionCode": $VCODE,
+            "minVersionCode": 1,
+            "downloadUrl": {
+              "android": "$APK_URL",
+              "windows": "$WIN_URL"
+            },
+            "sha256Checksum": {
+              "android": "$ANDROID_SHA",
+              "windows": "$WINDOWS_SHA"
+            },
+            "releaseNotes": ""
+          }
+          EOF
+
+      - uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "Update manifest for ${{ github.ref_name }} [skip ci]"
+          file_pattern: update_manifest.json
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            android-apk/app-release.apk
+            windows-zip/tagar-windows.zip
+          generate_release_notes: true
