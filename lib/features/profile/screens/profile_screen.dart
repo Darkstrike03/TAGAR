@@ -236,6 +236,65 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     }
   }
 
+  void _showAboutTagar() {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (_) => Padding(
+        padding: const EdgeInsets.fromLTRB(32, 32, 32, 48),
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: Text('Tagar', style: AppTextStyles.h1),
+              ),
+              const SizedBox(height: 4),
+              Center(
+                child: Text(
+                  'A nature-inspired messaging app',
+                  style: AppTextStyles.label,
+                ),
+              ),
+              const SizedBox(height: 24),
+              Text(
+                'Tagar is a messaging app with real-time communication, '
+                'QR code contact sharing, and a friend request system. '
+                'Built with Flutter and powered by Supabase.',
+                style: AppTextStyles.body,
+              ),
+              const SizedBox(height: 16),
+              Text('Features', style: AppTextStyles.bodyMedium),
+              const SizedBox(height: 8),
+              _aboutFeature('Real-time messaging via Supabase Realtime'),
+              _aboutFeature('Add contacts using QR codes or tagar IDs'),
+              _aboutFeature('Friend request system'),
+              _aboutFeature('Cross-platform (Android, Windows)'),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _aboutFeature(String text) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 6),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text('•  ', style: TextStyle(color: AppColors.leafGreen)),
+          Expanded(
+            child: Text(text, style: AppTextStyles.body),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final authState = ref.watch(authStateProvider);
@@ -385,7 +444,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           _menuItem(
             icon: Icons.info_outline,
             label: 'About Tagar',
-            onTap: () {},
+            onTap: _showAboutTagar,
           ),
           const Divider(height: 1, color: AppColors.barkCream),
         ],

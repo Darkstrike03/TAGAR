@@ -46,6 +46,41 @@ class MessageRelayService {
     } catch (_) {}
   }
 
+  Future<void> syncMissedMessages() async {
+    final userId = _userId;
+    if (userId.isEmpty) return;
+
+    try {
+      final response = await Supabase.instance.client
+          .from(_relayTable)
+          .select()
+          .eq('receiver_id', userId)
+          .order('created_at', ascending: true);
+
+      for (final data in response) {
+        final msg = LocalMessage(
+          id: data['id'] as String,
+          conversationId: data['sender_id'] as String,
+          text: data['text'] as String,
+          senderId: data['sender_id'] as String,
+          timestamp: DateTime.parse(data['created_at'] as String)
+              .millisecondsSinceEpoch,
+          status: 'received',
+        );
+
+        await _storage.insertMessage(msg);
+        messageNotifier.value++;
+
+        try {
+          await Supabase.instance.client
+              .from(_relayTable)
+              .delete()
+              .eq('id', data['id'] as String);
+        } catch (_) {}
+      }
+    } catch (_) {}
+  }
+
   void subscribeToIncoming() {
     _channel?.unsubscribe();
     final userId = _userId;
@@ -88,6 +123,8 @@ class MessageRelayService {
           },
         )
         .subscribe();
+
+    syncMissedMessages();
   }
 
   void unsubscribe() {

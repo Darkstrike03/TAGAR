@@ -6,6 +6,7 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/widgets/avatar_widget.dart';
 import '../../../providers/message_provider.dart';
+import '../../../providers/presence_provider.dart';
 import '../../../services/message_storage_service.dart';
 import '../widgets/message_bubble.dart';
 
@@ -34,8 +35,11 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   final _scrollController = ScrollController();
   List<LocalMessage> _messages = [];
   bool _loading = true;
+  bool _isOnline = false;
   late final _messageNotifier =
       ref.read(messageRelayProvider).messageNotifier;
+  late final _presenceService =
+      ref.read(presenceServiceProvider);
 
   @override
   void initState() {
@@ -43,6 +47,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     _loadMessages();
     _listenForNewMessages();
     _markAsRead();
+    _initPresence();
   }
 
   @override
@@ -50,7 +55,22 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     _controller.dispose();
     _scrollController.dispose();
     _messageNotifier.removeListener(_onNewMessage);
+    _presenceService.contactStatus.removeListener(_onPresenceChanged);
+    _presenceService.unwatch(widget.contactUserId);
     super.dispose();
+  }
+
+  void _initPresence() {
+    _presenceService.watch(widget.contactUserId);
+    _isOnline = _presenceService.isOnline(widget.contactUserId);
+    _presenceService.contactStatus.addListener(_onPresenceChanged);
+  }
+
+  void _onPresenceChanged() {
+    if (!mounted) return;
+    setState(() {
+      _isOnline = _presenceService.isOnline(widget.contactUserId);
+    });
   }
 
   Future<void> _loadMessages() async {
@@ -134,6 +154,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
               name: widget.contactName,
               imageUrl: widget.contactProfilePicture,
               size: 38,
+              isOnline: _isOnline,
             ),
             const SizedBox(width: 10),
             Column(
@@ -144,9 +165,9 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                   style: AppTextStyles.bodyMedium.copyWith(fontSize: 16),
                 ),
                 Text(
-                  widget.contactTagarId ?? '',
+                  _isOnline ? 'Online' : 'Offline',
                   style: AppTextStyles.caption.copyWith(
-                    color: AppColors.leafGreen,
+                    color: _isOnline ? AppColors.leafGreen : AppColors.sandyBrown,
                     fontSize: 12,
                   ),
                 ),

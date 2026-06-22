@@ -1,7 +1,7 @@
 name: tagar
 description: "Tagar — A nature-inspired communication app."
 publish_to: 'none'
-version: 1.0.6+7
+version: 1.0.7+0
 
 environment:
   sdk: ^3.10.7

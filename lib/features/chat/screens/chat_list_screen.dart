@@ -7,6 +7,7 @@ import '../../../core/theme/app_text_styles.dart';
 import '../../../core/widgets/avatar_widget.dart';
 import '../../../models/contact_model.dart';
 import '../../../providers/message_provider.dart';
+import '../../../providers/presence_provider.dart';
 import '../../../services/message_storage_service.dart';
 import '../../../router/route_names.dart';
 import '../../contacts/providers/contacts_provider.dart';
@@ -28,6 +29,7 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
     final relay = ref.read(messageRelayProvider);
     relay.subscribeToIncoming();
     relay.messageNotifier.addListener(_onMessageEvent);
+    ref.read(presenceServiceProvider).track();
   }
 
   void _onMessageEvent() {

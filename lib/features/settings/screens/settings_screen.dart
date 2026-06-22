@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
@@ -238,6 +240,35 @@ class _SettingsScreenState extends State<SettingsScreen> {
     });
   }
 
+  Future<void> _logout() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Log Out'),
+        content: const Text('Are you sure you want to log out?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            style: FilledButton.styleFrom(
+              backgroundColor: AppColors.error,
+            ),
+            child: const Text('Log Out'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true) {
+      await Supabase.instance.client.auth.signOut();
+      if (!mounted) return;
+      context.go('/login');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -249,6 +280,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
           _section('Account'),
           _menuItem(Icons.lock_outlined, 'Privacy'),
           _menuItem(Icons.notifications_outlined, 'Notifications'),
+          const SizedBox(height: 4),
+          _menuItem(Icons.logout, 'Log Out', onTap: _logout),
           const SizedBox(height: 16),
           _section('App'),
           _menuItem(Icons.language_outlined, 'Language'),

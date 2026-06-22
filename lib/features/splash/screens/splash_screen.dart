@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../core/theme/app_colors.dart';
@@ -62,12 +63,23 @@ class _SplashScreenState extends State<SplashScreen>
     });
   }
 
-  void _navigateToAuth() {
+  Future<void> _navigateToAuth() async {
     if (!mounted) return;
     final session = Supabase.instance.client.auth.currentSession;
     if (session != null) {
+      final prefs = await SharedPreferences.getInstance();
+      final pendingName = prefs.getString('pending_name');
+      if (pendingName != null) {
+        await Supabase.instance.client.from('user_data').update({
+          'profile_name': pendingName,
+          'username': pendingName,
+        }).eq('id', session.user.id);
+        await prefs.remove('pending_name');
+      }
+      if (!mounted) return;
       context.go('/chat');
     } else {
+      if (!mounted) return;
       context.go('/login');
     }
   }

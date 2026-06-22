@@ -1,16 +1,35 @@
-# tagar
+# Tagar 🌸
 
-A new Flutter project.
+A nature-inspired messaging app built with Flutter and Supabase.
 
-## Getting Started
+## Features
 
-This project is a starting point for a Flutter application.
+- Real-time messaging via Supabase Realtime
+- Add contacts using QR codes or tagar IDs
+- Friend request system
+- Cross-platform (Android, Windows)
 
-A few resources to get you started if this is your first Flutter project:
+## Tech Stack
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+- **Framework:** Flutter
+- **State Management:** Riverpod
+- **Backend:** Supabase (Auth, Database, Realtime)
+- **Local Storage:** SQLite
+- **QR:** qr_flutter + mobile_scanner
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## Setup
+
+1. Run `flutter pub get`
+2. Create a `.env` file in the project root with your Supabase credentials:
+
+```
+SUPABASE_URL=your_supabase_url
+SUPABASE_ANON_KEY=your_supabase_anon_key
+```
+
+3. Apply the SQL migrations from `migrations/` to your Supabase project
+4. Run `flutter run`
+
+## License
+
+All Rights Reserved. See `LICENSE` for details.

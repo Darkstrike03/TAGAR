@@ -8,16 +8,19 @@ class AvatarWidget extends StatelessWidget {
     this.imageUrl,
     required this.name,
     this.size = 48,
+    this.isOnline,
   });
 
   final String? imageUrl;
   final String name;
   final double size;
+  final bool? isOnline;
 
   @override
   Widget build(BuildContext context) {
+    Widget avatar;
     if (imageUrl != null) {
-      return ClipOval(
+      avatar = ClipOval(
         child: CachedNetworkImage(
           imageUrl: imageUrl!,
           width: size,
@@ -26,8 +29,33 @@ class AvatarWidget extends StatelessWidget {
           errorWidget: (_, __, ___) => _placeholder,
         ),
       );
+    } else {
+      avatar = _placeholder;
     }
-    return _placeholder;
+
+    if (isOnline != null) {
+      avatar = Stack(
+        clipBehavior: Clip.none,
+        children: [
+          avatar,
+          Positioned(
+            right: 0,
+            bottom: 0,
+            child: Container(
+              width: size * 0.3,
+              height: size * 0.3,
+              decoration: BoxDecoration(
+                color: isOnline! ? AppColors.leafGreen : AppColors.sandyBrown,
+                shape: BoxShape.circle,
+                border: Border.all(color: AppColors.petalWhite, width: 1.5),
+              ),
+            ),
+          ),
+        ],
+      );
+    }
+
+    return avatar;
   }
 
   Widget get _placeholder => Container(

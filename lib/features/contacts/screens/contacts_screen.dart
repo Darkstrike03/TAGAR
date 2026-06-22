@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:qr_flutter/qr_flutter.dart';
 
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
@@ -39,6 +40,49 @@ class _ContactsScreenState extends ConsumerState<ContactsScreen>
     ref.invalidate(sentRequestsProvider);
   }
 
+  Future<void> _showMyQrCode() async {
+    final tagarId = await ref.read(contactServiceProvider).getMyTagarId();
+    if (!mounted) return;
+
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (_) => Padding(
+        padding: const EdgeInsets.fromLTRB(32, 32, 32, 48),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text('My QR Code', style: AppTextStyles.h2),
+            const SizedBox(height: 24),
+            QrImageView(
+              data: tagarId,
+              version: QrVersions.auto,
+              size: 160,
+              eyeStyle: const QrEyeStyle(
+                eyeShape: QrEyeShape.square,
+                color: AppColors.forestGreen,
+              ),
+              dataModuleStyle: const QrDataModuleStyle(
+                dataModuleShape: QrDataModuleShape.square,
+                color: AppColors.leafGreen,
+              ),
+            ),
+            const SizedBox(height: 16),
+            Text(tagarId, style: AppTextStyles.bodyMedium),
+            const SizedBox(height: 8),
+            Text(
+              'Ask others to scan this code to add you',
+              style: AppTextStyles.label,
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final requestCountAsync = ref.watch(pendingRequestCountProvider);
@@ -46,6 +90,7 @@ class _ContactsScreenState extends ConsumerState<ContactsScreen>
     return Scaffold(
       backgroundColor: AppColors.petalWhite,
       appBar: AppBar(title: const Text('Contacts')),
+      bottomNavigationBar: _buildMyQrBar(),
       body: RefreshIndicator(
         onRefresh: () async => _refresh(),
         child: Column(
@@ -330,6 +375,29 @@ class _ContactsScreenState extends ConsumerState<ContactsScreen>
           },
         ),
       ],
+    );
+  }
+
+  Widget _buildMyQrBar() {
+    return Container(
+      decoration: const BoxDecoration(
+        border: Border(
+          top: BorderSide(color: AppColors.sandyBrown, width: 0.5),
+        ),
+        color: AppColors.petalWhite,
+      ),
+      child: SafeArea(
+        top: false,
+        child: ListTile(
+          leading: const Icon(Icons.qr_code, color: AppColors.leafGreen),
+          title: Text('My QR Code', style: AppTextStyles.body),
+          trailing: const Icon(
+            Icons.chevron_right,
+            color: AppColors.sandyBrown,
+          ),
+          onTap: _showMyQrCode,
+        ),
+      ),
     );
   }
 }

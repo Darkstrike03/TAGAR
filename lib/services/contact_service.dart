@@ -5,7 +5,7 @@ class ContactService {
   String get _userId =>
       Supabase.instance.client.auth.currentUser?.id ?? '';
 
-  Future<String> _getCurrentUserTagarId() async {
+  Future<String> getMyTagarId() async {
     final response = await Supabase.instance.client
         .from('user_data')
         .select('tagar_id')
@@ -126,7 +126,7 @@ class ContactService {
   }
 
   Future<void> sendRequest(String toUserId, String toTagarId) async {
-    final tagarId = await _getCurrentUserTagarId();
+    final tagarId = await getMyTagarId();
     await Supabase.instance.client.from('friend_requests').insert({
       'from_user_id': _userId,
       'to_user_id': toUserId,

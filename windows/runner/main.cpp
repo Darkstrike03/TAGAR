@@ -5,6 +5,37 @@
 #include "flutter_window.h"
 #include "utils.h"
 
+void RegisterTagarProtocol() {
+  const wchar_t* app_path = L"tagar.exe";
+  wchar_t full_path[MAX_PATH];
+  if (!GetModuleFileNameW(nullptr, full_path, MAX_PATH)) {
+    return;
+  }
+
+  HKEY key;
+  LSTATUS result = RegCreateKeyExW(
+      HKEY_CURRENT_USER,
+      L"Software\\Classes\\tagar",
+      0, nullptr, REG_OPTION_NON_VOLATILE,
+      KEY_SET_VALUE, nullptr, &key, nullptr);
+  if (result != ERROR_SUCCESS) return;
+
+  RegSetValueExW(key, L"URL Protocol", 0, REG_SZ,
+                 reinterpret_cast<const BYTE*>(L""), sizeof(wchar_t));
+
+  std::wstring command = L"\"" + std::wstring(full_path) + L"\" \"%1\"";
+  HKEY shellKey;
+  if (RegCreateKeyExW(key, L"shell\\open\\command", 0, nullptr,
+                      REG_OPTION_NON_VOLATILE, KEY_SET_VALUE,
+                      nullptr, &shellKey, nullptr) == ERROR_SUCCESS) {
+    RegSetValueExW(shellKey, nullptr, 0, REG_SZ,
+                   reinterpret_cast<const BYTE*>(command.c_str()),
+                   (command.size() + 1) * sizeof(wchar_t));
+    RegCloseKey(shellKey);
+  }
+  RegCloseKey(key);
+}
+
 int APIENTRY wWinMain(_In_ HINSTANCE instance, _In_opt_ HINSTANCE prev,
                       _In_ wchar_t *command_line, _In_ int show_command) {
   // Attach to console when present (e.g., 'flutter run') or create a
@@ -16,6 +47,8 @@ int APIENTRY wWinMain(_In_ HINSTANCE instance, _In_opt_ HINSTANCE prev,
   // Initialize COM, so that it is available for use in the library and/or
   // plugins.
   ::CoInitializeEx(nullptr, COINIT_APARTMENTTHREADED);
+
+  RegisterTagarProtocol();
 
   flutter::DartProject project(L"data");
 
