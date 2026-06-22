@@ -6,7 +6,6 @@
 #include "utils.h"
 
 void RegisterTagarProtocol() {
-  const wchar_t* app_path = L"tagar.exe";
   wchar_t full_path[MAX_PATH];
   if (!GetModuleFileNameW(nullptr, full_path, MAX_PATH)) {
     return;
@@ -20,17 +19,18 @@ void RegisterTagarProtocol() {
       KEY_SET_VALUE, nullptr, &key, nullptr);
   if (result != ERROR_SUCCESS) return;
 
+  DWORD nullLen = static_cast<DWORD>(sizeof(wchar_t));
   RegSetValueExW(key, L"URL Protocol", 0, REG_SZ,
-                 reinterpret_cast<const BYTE*>(L""), sizeof(wchar_t));
+                 reinterpret_cast<const BYTE*>(L""), nullLen);
 
   std::wstring command = L"\"" + std::wstring(full_path) + L"\" \"%1\"";
   HKEY shellKey;
   if (RegCreateKeyExW(key, L"shell\\open\\command", 0, nullptr,
                       REG_OPTION_NON_VOLATILE, KEY_SET_VALUE,
                       nullptr, &shellKey, nullptr) == ERROR_SUCCESS) {
+    DWORD cmdLen = static_cast<DWORD>((command.size() + 1) * sizeof(wchar_t));
     RegSetValueExW(shellKey, nullptr, 0, REG_SZ,
-                   reinterpret_cast<const BYTE*>(command.c_str()),
-                   (command.size() + 1) * sizeof(wchar_t));
+                   reinterpret_cast<const BYTE*>(command.c_str()), cmdLen);
     RegCloseKey(shellKey);
   }
   RegCloseKey(key);
