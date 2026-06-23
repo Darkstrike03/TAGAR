@@ -5,9 +5,12 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/widgets/avatar_widget.dart';
+import '../../../features/contacts/providers/contacts_provider.dart';
 import '../../../providers/message_provider.dart';
 import '../../../providers/presence_provider.dart';
+import '../../../services/contact_service.dart';
 import '../../../services/message_storage_service.dart';
+import '../widgets/chat_background.dart';
 import '../widgets/message_bubble.dart';
 
 class ChatScreen extends ConsumerStatefulWidget {
@@ -34,6 +37,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   final _controller = TextEditingController();
   final _scrollController = ScrollController();
   List<LocalMessage> _messages = [];
+  late String _contactName;
   bool _loading = true;
   bool _isOnline = false;
   late final _messageNotifier =
@@ -44,6 +48,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   @override
   void initState() {
     super.initState();
+    _contactName = widget.contactName;
     _loadMessages();
     _listenForNewMessages();
     _markAsRead();
@@ -136,6 +141,102 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     }
   }
 
+  Future<void> _showNicknameDialog() async {
+    final controller = TextEditingController(text: _contactName);
+    final name = await showDialog<String>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Set Nickname'),
+        content: TextField(
+          controller: controller,
+          autofocus: true,
+          maxLength: 50,
+          decoration: const InputDecoration(
+            hintText: 'Enter a nickname for this contact',
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx, controller.text.trim()),
+            child: const Text('Save'),
+          ),
+        ],
+      ),
+    );
+    if (name == null || name.isEmpty) return;
+    final contactSvc = ContactService();
+    await contactSvc.updateNickname(widget.contactUserId, name);
+    if (!mounted) return;
+    setState(() => _contactName = name);
+    ref.invalidate(contactsProvider);
+  }
+
+  Future<void> _clearNickname() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Clear Nickname'),
+        content: const Text(
+          'Remove the custom nickname for this contact?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            style: FilledButton.styleFrom(
+              backgroundColor: AppColors.error,
+            ),
+            child: const Text('Clear'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed == true) {
+      final contactSvc = ContactService();
+      await contactSvc.clearNickname(widget.contactUserId);
+      ref.invalidate(contactsProvider);
+    }
+  }
+
+  Future<void> _deleteMessage(String messageId) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Delete Message'),
+        content: const Text(
+            'Delete this message? This cannot be undone.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            style: FilledButton.styleFrom(
+              backgroundColor: AppColors.error,
+            ),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true) {
+      final storage = ref.read(messageStorageProvider);
+      await storage.deleteMessage(messageId);
+      setState(() {
+        _messages.removeWhere((m) => m.id == messageId);
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -151,7 +252,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
         title: Row(
           children: [
             AvatarWidget(
-              name: widget.contactName,
+              name: _contactName,
               imageUrl: widget.contactProfilePicture,
               size: 38,
               isOnline: _isOnline,
@@ -161,7 +262,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  widget.contactName,
+                  _contactName,
                   style: AppTextStyles.bodyMedium.copyWith(fontSize: 16),
                 ),
                 Text(
@@ -184,24 +285,62 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
             icon: const Icon(Icons.videocam_outlined),
             onPressed: () {},
           ),
+          PopupMenuButton<String>(
+            icon: const Icon(Icons.more_vert),
+            color: AppColors.petalWhite,
+            onSelected: (value) {
+              if (value == 'nickname') {
+                _showNicknameDialog();
+              } else if (value == 'clear_nickname') {
+                _clearNickname();
+              }
+            },
+            itemBuilder: (_) => [
+              const PopupMenuItem(
+                value: 'nickname',
+                child: ListTile(
+                  leading: Icon(Icons.edit_outlined,
+                      color: AppColors.forestGreen),
+                  title: Text('Set Nickname'),
+                  contentPadding: EdgeInsets.zero,
+                  visualDensity: VisualDensity.compact,
+                ),
+              ),
+              const PopupMenuItem(
+                value: 'clear_nickname',
+                child: ListTile(
+                  leading: Icon(Icons.clear,
+                      color: AppColors.error),
+                  title: Text('Clear Nickname',
+                      style: TextStyle(color: AppColors.error)),
+                  contentPadding: EdgeInsets.zero,
+                  visualDensity: VisualDensity.compact,
+                ),
+              ),
+            ],
+          ),
         ],
       ),
-      body: _loading
-          ? const Center(child: CircularProgressIndicator())
-          : Column(
-              children: [
-                Expanded(
-                  child: _messages.isEmpty
-                      ? Center(
-                          child: Text(
-                            'Start a conversation with ${widget.contactName}',
-                            style: AppTextStyles.label,
-                          ),
-                        )
-                      : ListView.builder(
-                          controller: _scrollController,
-                          padding: const EdgeInsets.only(top: 8, bottom: 8),
-                          itemCount: _messages.length,
+      body: Stack(
+        children: [
+          const ChatBackground(),
+          _loading
+              ? const Center(child: CircularProgressIndicator())
+              : Column(
+                  children: [
+                    Expanded(
+                      child: _messages.isEmpty
+                          ? Center(
+                              child: Text(
+                                'Start a conversation with $_contactName',
+                                style: AppTextStyles.label,
+                              ),
+                            )
+                          : ListView.builder(
+                              controller: _scrollController,
+                              padding:
+                                  const EdgeInsets.only(top: 8, bottom: 8),
+                              itemCount: _messages.length,
                           itemBuilder: (_, index) {
                             final msg = _messages[index];
                             final userId = Supabase.instance.client.auth
@@ -214,6 +353,8 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                                   DateTime.fromMillisecondsSinceEpoch(
                                       msg.timestamp)),
                               isRead: msg.status == 'read',
+                              onLongPress: () =>
+                                  _deleteMessage(msg.id),
                             );
                           },
                         ),
@@ -221,6 +362,8 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                 _buildInputBar(),
               ],
             ),
+          ],
+        ),
     );
   }
 

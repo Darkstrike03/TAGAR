@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="120" height="120">
+  <circle cx="56" cy="56" r="6" fill="#5A8A3C" opacity="0.5"/>
+  <path d="M56 10 C70 20 80 36 80 50 C72 48 60 48 56 56 Z" fill="none" stroke="#5A8A3C" stroke-width="2"/>
+  <path d="M56 10 C42 20 32 36 32 50 C40 48 52 48 56 56 Z" fill="none" stroke="#5A8A3C" stroke-width="2"/>
+  <path d="M102 56 C92 70 76 80 62 80 C64 72 64 60 56 56 Z" fill="none" stroke="#5A8A3C" stroke-width="2"/>
+  <path d="M10 56 C20 70 36 80 50 80 C48 72 48 60 56 56 Z" fill="none" stroke="#5A8A3C" stroke-width="2"/>
+  <path d="M80 20 C82 30 82 44 72 48 C72 38 68 28 56 22 Z" fill="none" stroke="#5A8A3C" stroke-width="2"/>
+  <path d="M32 20 C30 30 30 44 40 48 C40 38 44 28 56 22 Z" fill="none" stroke="#5A8A3C" stroke-width="2"/>
+  <path d="M80 92 C82 82 82 68 72 64 C72 74 68 84 56 90 Z" fill="none" stroke="#5A8A3C" stroke-width="2"/>
+  <path d="M32 92 C30 82 30 68 40 64 C40 74 44 84 56 90 Z" fill="none" stroke="#5A8A3C" stroke-width="2"/>
+  <circle cx="56" cy="56" r="3" fill="#5A8A3C"/>
+  <path d="M56 14 L56 6" fill="none" stroke="#5A8A3C" stroke-width="1.5" stroke-linecap="round"/>
+  <path d="M56 98 L56 106" fill="none" stroke="#5A8A3C" stroke-width="1.5" stroke-linecap="round"/>
+  <path d="M14 56 L6 56" fill="none" stroke="#5A8A3C" stroke-width="1.5" stroke-linecap="round"/>
+  <path d="M98 56 L106 56" fill="none" stroke="#5A8A3C" stroke-width="1.5" stroke-linecap="round"/>
+</svg>

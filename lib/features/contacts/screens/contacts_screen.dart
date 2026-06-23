@@ -5,6 +5,8 @@ import 'package:qr_flutter/qr_flutter.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/widgets/avatar_widget.dart';
+import '../../../models/contact_model.dart';
+import '../../../services/contact_service.dart';
 import '../../chat/screens/chat_screen.dart';
 import '../providers/contacts_provider.dart';
 import '../widgets/request_tile.dart';
@@ -38,6 +40,67 @@ class _ContactsScreenState extends ConsumerState<ContactsScreen>
     ref.invalidate(pendingRequestCountProvider);
     ref.invalidate(receivedRequestsProvider);
     ref.invalidate(sentRequestsProvider);
+  }
+
+  Future<void> _showNicknameDialog(Contact contact) async {
+    final controller = TextEditingController(text: contact.displayName ?? '');
+    final name = await showDialog<String>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Set Nickname'),
+        content: TextField(
+          controller: controller,
+          autofocus: true,
+          maxLength: 50,
+          decoration: const InputDecoration(
+            hintText: 'Enter a nickname for this contact',
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx, controller.text.trim()),
+            child: const Text('Save'),
+          ),
+        ],
+      ),
+    );
+    if (name == null || name.isEmpty) return;
+    final svc = ContactService();
+    await svc.updateNickname(contact.contactUserId, name);
+    _refresh();
+  }
+
+  Future<void> _clearNickname(Contact contact) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Clear Nickname'),
+        content: const Text(
+            'Remove the custom nickname for this contact?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            style: FilledButton.styleFrom(
+              backgroundColor: AppColors.error,
+            ),
+            child: const Text('Clear'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed == true) {
+      final svc = ContactService();
+      await svc.clearNickname(contact.contactUserId);
+      _refresh();
+    }
   }
 
   Future<void> _showMyQrCode() async {
@@ -271,6 +334,44 @@ class _ContactsScreenState extends ConsumerState<ContactsScreen>
                   ),
                 );
               },
+              onLongPress: () => showModalBottomSheet(
+                context: context,
+                shape: const RoundedRectangleBorder(
+                  borderRadius:
+                      BorderRadius.vertical(top: Radius.circular(20)),
+                ),
+                builder: (ctx) => SafeArea(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 8),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        ListTile(
+                          leading: const Icon(Icons.edit_outlined,
+                              color: AppColors.forestGreen),
+                          title: const Text('Set Nickname'),
+                          onTap: () {
+                            Navigator.pop(ctx);
+                            _showNicknameDialog(c);
+                          },
+                        ),
+                        if (c.displayName != null)
+                          ListTile(
+                            leading: const Icon(Icons.clear,
+                                color: AppColors.error),
+                            title: const Text('Clear Nickname',
+                                style:
+                                    TextStyle(color: AppColors.error)),
+                            onTap: () {
+                              Navigator.pop(ctx);
+                              _clearNickname(c);
+                            },
+                          ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
             );
           },
         );

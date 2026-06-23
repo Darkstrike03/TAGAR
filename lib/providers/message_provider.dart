@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../services/message_storage_service.dart';
 import '../services/message_relay_service.dart';
+import '../services/storage_management_service.dart';
 
 final messageStorageProvider = Provider<MessageStorageService>((ref) {
   final svc = MessageStorageService();
@@ -31,4 +32,9 @@ final unreadCountProvider =
     FutureProvider.family<int, String>((ref, conversationId) {
   final storage = ref.read(messageStorageProvider);
   return storage.getUnreadCount(conversationId);
+});
+
+final storageManagementProvider = Provider<StorageManagementService>((ref) {
+  final storage = ref.read(messageStorageProvider);
+  return StorageManagementService(storage);
 });

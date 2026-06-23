@@ -9,6 +9,7 @@ import '../features/updates/screens/updates_screen.dart';
 import '../features/language_store/screens/language_store_screen.dart';
 import '../features/profile/screens/profile_screen.dart';
 import '../features/settings/screens/settings_screen.dart';
+import '../features/settings/screens/storage_screen.dart';
 import '../features/contacts/screens/contacts_screen.dart';
 import '../features/contacts/screens/add_contact_screen.dart';
 import '../features/chat/screens/chat_screen.dart';
@@ -244,6 +245,11 @@ final GoRouter appRouter = GoRouter(
       path: '/settings',
       name: RouteNames.settings,
       builder: (_, __) => const SettingsScreen(),
+    ),
+    GoRoute(
+      path: '/storage',
+      name: RouteNames.storage,
+      builder: (_, __) => const StorageScreen(),
     ),
   ],
 );

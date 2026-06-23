@@ -125,6 +125,23 @@ class ContactService {
     return response;
   }
 
+  Future<void> updateNickname(
+      String contactUserId, String displayName) async {
+    await Supabase.instance.client
+        .from('contacts')
+        .update({'display_name': displayName})
+        .eq('user_id', _userId)
+        .eq('contact_user_id', contactUserId);
+  }
+
+  Future<void> clearNickname(String contactUserId) async {
+    await Supabase.instance.client
+        .from('contacts')
+        .update({'display_name': null})
+        .eq('user_id', _userId)
+        .eq('contact_user_id', contactUserId);
+  }
+
   Future<void> sendRequest(String toUserId, String toTagarId) async {
     final tagarId = await getMyTagarId();
     await Supabase.instance.client.from('friend_requests').insert({

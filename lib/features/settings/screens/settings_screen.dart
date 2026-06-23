@@ -66,13 +66,26 @@ class _SettingsScreenState extends State<SettingsScreen> {
     final info = await PackageInfo.fromPlatform();
     if (!mounted) return;
 
-    final currentVersionCode = int.tryParse(info.buildNumber) ?? 0;
-
-    if (manifest.versionCode > currentVersionCode) {
+    if (_isNewerVersion(manifest.latestVersion, info.version)) {
       _showUpdateAvailableDialog(manifest);
     } else {
       _showUpToDateDialog();
     }
+  }
+
+  bool _isNewerVersion(String remote, String current) {
+    final remoteParts = remote.split('.').map((e) => int.tryParse(e) ?? 0).toList();
+    final currentParts = current.split('.').map((e) => int.tryParse(e) ?? 0).toList();
+    final maxLen = remoteParts.length > currentParts.length
+        ? remoteParts.length
+        : currentParts.length;
+    for (int i = 0; i < maxLen; i++) {
+      final r = i < remoteParts.length ? remoteParts[i] : 0;
+      final c = i < currentParts.length ? currentParts[i] : 0;
+      if (r > c) return true;
+      if (r < c) return false;
+    }
+    return false;
   }
 
   void _showErrorDialog() {
@@ -285,6 +298,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
           const SizedBox(height: 16),
           _section('App'),
           _menuItem(Icons.language_outlined, 'Language'),
+          _menuItem(
+            Icons.storage_outlined,
+            'Storage & Data',
+            onTap: () => context.push('/storage'),
+          ),
           _menuItem(
             Icons.system_update_outlined,
             'Check for Updates',

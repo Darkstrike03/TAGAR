@@ -11,4 +11,5 @@ class RouteNames {
   static const String settings = 'settings';
   static const String contacts = 'contacts';
   static const String addContact = 'add_contact';
+  static const String storage = 'storage';
 }

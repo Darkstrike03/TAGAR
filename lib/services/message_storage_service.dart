@@ -1,4 +1,5 @@
-import 'package:sqflite/sqflite.dart';
+import 'dart:io';
+
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
@@ -182,6 +183,45 @@ class MessageStorageService {
     final db = await database;
     await db.delete('messages',
         where: 'conversation_id = ?', whereArgs: [conversationId]);
+  }
+
+  Future<void> deleteMessage(String messageId) async {
+    final db = await database;
+    await db.delete('messages', where: 'id = ?', whereArgs: [messageId]);
+  }
+
+  Future<int> getMessageCount() async {
+    final db = await database;
+    final result = await db.rawQuery('SELECT COUNT(*) as count FROM messages');
+    return (result.first['count'] as int?) ?? 0;
+  }
+
+  Future<int> getConversationMessageCount(String conversationId) async {
+    final db = await database;
+    final result = await db.rawQuery(
+      'SELECT COUNT(*) as count FROM messages WHERE conversation_id = ?',
+      [conversationId],
+    );
+    return (result.first['count'] as int?) ?? 0;
+  }
+
+  Future<String> getDatabasePath() async {
+    final dir = await getApplicationDocumentsDirectory();
+    return p.join(dir.path, 'tagar_messages.db');
+  }
+
+  Future<int> getDatabaseSize() async {
+    final path = await getDatabasePath();
+    try {
+      return File(path).statSync().size;
+    } catch (_) {
+      return 0;
+    }
+  }
+
+  Future<void> deleteAllMessages() async {
+    final db = await database;
+    await db.delete('messages');
   }
 
   Future<void> close() async {

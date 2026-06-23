@@ -8,12 +8,14 @@ class MessageBubble extends StatelessWidget {
     required this.isSent,
     required this.time,
     this.isRead = false,
+    this.onLongPress,
   });
 
   final String text;
   final bool isSent;
   final String time;
   final bool isRead;
+  final VoidCallback? onLongPress;
 
   @override
   Widget build(BuildContext context) {
@@ -23,59 +25,62 @@ class MessageBubble extends StatelessWidget {
         crossAxisAlignment:
             isSent ? CrossAxisAlignment.end : CrossAxisAlignment.start,
         children: [
-          Container(
-            constraints: BoxConstraints(
-              maxWidth: MediaQuery.of(context).size.width * 0.75,
-            ),
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-            decoration: BoxDecoration(
-              color: isSent ? AppColors.leafGreen : AppColors.earthBrown.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.only(
-                topLeft: const Radius.circular(18),
-                topRight: const Radius.circular(18),
-                bottomLeft: Radius.circular(isSent ? 18 : 4),
-                bottomRight: Radius.circular(isSent ? 4 : 18),
+          GestureDetector(
+            onLongPress: onLongPress,
+            child: Container(
+              constraints: BoxConstraints(
+                maxWidth: MediaQuery.of(context).size.width * 0.75,
               ),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  text,
-                  style: TextStyle(
-                    fontFamily: 'NotoSans',
-                    fontSize: 16,
-                    height: 1.3,
-                    color: isSent ? AppColors.petalWhite : AppColors.forestGreen,
-                  ),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+              decoration: BoxDecoration(
+                color: isSent ? AppColors.leafGreen : AppColors.earthBrown.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.only(
+                  topLeft: const Radius.circular(18),
+                  topRight: const Radius.circular(18),
+                  bottomLeft: Radius.circular(isSent ? 18 : 4),
+                  bottomRight: Radius.circular(isSent ? 4 : 18),
                 ),
-                const SizedBox(height: 4),
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      time,
-                      style: TextStyle(
-                        fontFamily: 'NotoSans',
-                        fontSize: 11,
-                        color: isSent
-                            ? AppColors.petalWhite.withValues(alpha: 0.7)
-                            : AppColors.earthBrown,
-                      ),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    text,
+                    style: TextStyle(
+                      fontFamily: 'NotoSans',
+                      fontSize: 16,
+                      height: 1.3,
+                      color: isSent ? AppColors.petalWhite : AppColors.forestGreen,
                     ),
-                    if (isSent) ...[
-                      const SizedBox(width: 4),
-                      Icon(
-                        isRead ? Icons.done_all : Icons.done,
-                        size: 14,
-                        color: isRead
-                            ? AppColors.skyBlue
-                            : AppColors.petalWhite.withValues(alpha: 0.7),
+                  ),
+                  const SizedBox(height: 4),
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        time,
+                        style: TextStyle(
+                          fontFamily: 'NotoSans',
+                          fontSize: 11,
+                          color: isSent
+                              ? AppColors.petalWhite.withValues(alpha: 0.7)
+                              : AppColors.earthBrown,
+                        ),
                       ),
+                      if (isSent) ...[
+                        const SizedBox(width: 4),
+                        Icon(
+                          isRead ? Icons.done_all : Icons.done,
+                          size: 14,
+                          color: isRead
+                              ? AppColors.skyBlue
+                              : AppColors.petalWhite.withValues(alpha: 0.7),
+                        ),
+                      ],
                     ],
-                  ],
-                ),
-              ],
+                  ),
+                ],
+              ),
             ),
           ),
         ],
